@@ -22,11 +22,11 @@ struct Movie: Codable {
 	let video: Bool?
 	let voteAverage: Double?
 	let voteCount: Int?
-	
+
 	var posterUrl: String {
 		return "https://image.tmdb.org/t/p/w500/\(posterPath ?? "")"
 	}
-	
+
 	enum CodingKeys: String, CodingKey {
 		case adult
 		case backdropPath = "backdrop_path"
