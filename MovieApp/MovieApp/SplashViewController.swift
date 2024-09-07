@@ -26,3 +26,6 @@ class SplashViewController: UIViewController {
 	}
 }
 
+struct codeF : Codable {
+
+}
