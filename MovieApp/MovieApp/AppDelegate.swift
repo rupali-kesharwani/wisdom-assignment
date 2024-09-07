@@ -11,6 +11,13 @@ import UIKit
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
+	// Computed property to return the key window from UIScene
+	static var keyWindow: UIWindow? {
+		return (UIApplication.shared.connectedScenes.first { scene in
+			scene is UIWindowScene
+		}?.delegate as? SceneDelegate)?.window
+	}
+
 
 	func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 		// Override point for customization after application launch.
