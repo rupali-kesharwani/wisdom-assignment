@@ -13,6 +13,8 @@ class MovieListViewController: UIViewController, UITableViewDelegate, UITableVie
 	var totalPages: Int?
 	var movies: [Movie] = []
 
+	private let refreshControl = UIRefreshControl()
+
 	var hasNextPage: Bool {
 		return (currentPage ?? 0) < (totalPages ?? 0)
 	}
@@ -21,13 +23,21 @@ class MovieListViewController: UIViewController, UITableViewDelegate, UITableVie
 
 	override func viewDidLoad() {
 		super.viewDidLoad()
-		
+
 		setupTableView()
 		fetchMovies()
 	}
 
 	func fetchMovies(page: Int = 1) {
 		MoviesAPI.getPopularMovies(page: page) { [weak self] response in
+			if page == 1 {
+				self?.resetState()
+			}
+
+			if self?.refreshControl.isRefreshing == true {
+				self?.refreshControl.endRefreshing()
+			}
+
 			self?.currentPage = response.page
 			self?.totalPages = response.totalPages
 			self?.movies.append(contentsOf: response.movies ?? [])
@@ -39,8 +49,21 @@ class MovieListViewController: UIViewController, UITableViewDelegate, UITableVie
 		tableView?.dataSource = self
 		tableView?.delegate = self
 
+		refreshControl.addTarget(self, action: #selector(refreshData(_:)), for: .valueChanged)
+		tableView?.refreshControl = refreshControl
+
 		MovieListTableViewCell.register(in: tableView)
 		PaginationLoaderTableViewCell.register(in: tableView)
+	}
+
+	@objc private func refreshData(_ sender: Any) {
+		fetchMovies()
+	}
+
+	private func resetState() {
+		self.movies = []
+		self.currentPage = nil
+		self.totalPages = nil
 	}
 
 	func numberOfSections(in tableView: UITableView) -> Int {
