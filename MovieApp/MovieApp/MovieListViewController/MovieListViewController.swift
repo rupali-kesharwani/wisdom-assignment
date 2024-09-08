@@ -23,8 +23,24 @@ class MovieListViewController: UIViewController, UITableViewDelegate, UITableVie
 	override func viewDidLoad() {
 		super.viewDidLoad()
 
+		setupNavigationBar()
 		setupTableView()
 		fetchMovies()
+	}
+
+	private func setupNavigationBar() {
+		self.title = "Popular Movies"
+		self.navigationController?.navigationBar.prefersLargeTitles = true
+		let searchButton = UIBarButtonItem(
+			image: UIImage(systemName: "magnifyingglass"),
+			style: .plain,
+			target: self,
+			action: #selector(Self.onSearchButtonTapped))
+		navigationItem.rightBarButtonItem = searchButton
+	}
+
+	@objc private func onSearchButtonTapped() {
+
 	}
 
 	private func setupTableView() {

@@ -19,8 +19,9 @@ class SplashViewController: UIViewController {
 		DispatchQueue.main.asyncAfter(
 			deadline: .now().advanced(by: .seconds(deadlineSeconds)),
 			execute: {
-				let appLayoutViewController = MovieListViewController(nibName: "MovieListViewController", bundle: nil)
-				AppDelegate.keyWindow?.rootViewController = appLayoutViewController
+				let movieListViewController = MovieListViewController(nibName: "MovieListViewController", bundle: nil)
+				let navigationController = UINavigationController(rootViewController: movieListViewController)
+				AppDelegate.keyWindow?.rootViewController = navigationController
 				AppDelegate.keyWindow?.makeKeyAndVisible()
 			})
 	}
