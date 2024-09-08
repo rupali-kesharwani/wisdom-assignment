@@ -13,6 +13,8 @@
 		0F1431BD2C8DA17C006708A4 /* MovieListTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0F1431BB2C8DA17C006708A4 /* MovieListTableViewCell.xib */; };
 		0F1431C12C8DCD78006708A4 /* PaginationLoaderTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1431BF2C8DCD78006708A4 /* PaginationLoaderTableViewCell.swift */; };
 		0F1431C22C8DCD78006708A4 /* PaginationLoaderTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0F1431C02C8DCD78006708A4 /* PaginationLoaderTableViewCell.xib */; };
+		0F1431C52C8DD7C5006708A4 /* LoaderView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0F1431C42C8DD7C5006708A4 /* LoaderView.xib */; };
+		0F1431C72C8DD815006708A4 /* LoaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1431C62C8DD815006708A4 /* LoaderView.swift */; };
 		0F4BF72D2C8C842F0029AAB8 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F4BF72C2C8C842F0029AAB8 /* AppDelegate.swift */; };
 		0F4BF72F2C8C842F0029AAB8 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F4BF72E2C8C842F0029AAB8 /* SceneDelegate.swift */; };
 		0F4BF7312C8C842F0029AAB8 /* SplashViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F4BF7302C8C842F0029AAB8 /* SplashViewController.swift */; };
@@ -60,6 +62,8 @@
 		0F1431BB2C8DA17C006708A4 /* MovieListTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MovieListTableViewCell.xib; sourceTree = "<group>"; };
 		0F1431BF2C8DCD78006708A4 /* PaginationLoaderTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaginationLoaderTableViewCell.swift; sourceTree = "<group>"; };
 		0F1431C02C8DCD78006708A4 /* PaginationLoaderTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = PaginationLoaderTableViewCell.xib; sourceTree = "<group>"; };
+		0F1431C42C8DD7C5006708A4 /* LoaderView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = LoaderView.xib; sourceTree = "<group>"; };
+		0F1431C62C8DD815006708A4 /* LoaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoaderView.swift; sourceTree = "<group>"; };
 		0F4BF7292C8C842F0029AAB8 /* MovieApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MovieApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0F4BF72C2C8C842F0029AAB8 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		0F4BF72E2C8C842F0029AAB8 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -139,6 +143,15 @@
 			path = PaginationLoaderTableViewCell;
 			sourceTree = "<group>";
 		};
+		0F1431C32C8DD7AB006708A4 /* LoaderView */ = {
+			isa = PBXGroup;
+			children = (
+				0F1431C62C8DD815006708A4 /* LoaderView.swift */,
+				0F1431C42C8DD7C5006708A4 /* LoaderView.xib */,
+			);
+			path = LoaderView;
+			sourceTree = "<group>";
+		};
 		0F4BF7202C8C842F0029AAB8 = {
 			isa = PBXGroup;
 			children = (
@@ -162,6 +175,7 @@
 		0F4BF72B2C8C842F0029AAB8 /* MovieApp */ = {
 			isa = PBXGroup;
 			children = (
+				0F1431C32C8DD7AB006708A4 /* LoaderView */,
 				0F4BF7642C8CAA420029AAB8 /* Networking */,
 				0F4BF7612C8CA8370029AAB8 /* Models */,
 				0F1431B92C8DA141006708A4 /* MovieListTableViewCell */,
@@ -358,6 +372,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				0F4BF7362C8C84310029AAB8 /* Assets.xcassets in Resources */,
+				0F1431C52C8DD7C5006708A4 /* LoaderView.xib in Resources */,
 				0F4BF7392C8C84310029AAB8 /* Base in Resources */,
 				0F1431BD2C8DA17C006708A4 /* MovieListTableViewCell.xib in Resources */,
 				0F4BF75F2C8C875F0029AAB8 /* AppLayoutViewController.xib in Resources */,
@@ -405,6 +420,7 @@
 				0F1431C12C8DCD78006708A4 /* PaginationLoaderTableViewCell.swift in Sources */,
 				0F4BF76A2C8CAB590029AAB8 /* Server.swift in Sources */,
 				0F4BF7632C8CA8540029AAB8 /* Movie.swift in Sources */,
+				0F1431C72C8DD815006708A4 /* LoaderView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -28,20 +28,22 @@ class MovieListViewController: UIViewController, UITableViewDelegate, UITableVie
 		fetchMovies()
 	}
 
-	func fetchMovies(page: Int = 1) {
+	func fetchMovies(page: Int = 1, shouldShowLoader: Bool = true) {
+		if shouldShowLoader {
+			showLoader()
+		}
+
 		MoviesAPI.getPopularMovies(page: page) { [weak self] response in
 			if page == 1 {
 				self?.resetState()
-			}
-
-			if self?.refreshControl.isRefreshing == true {
-				self?.refreshControl.endRefreshing()
 			}
 
 			self?.currentPage = response.page
 			self?.totalPages = response.totalPages
 			self?.movies.append(contentsOf: response.movies ?? [])
 			self?.tableView?.reloadData()
+
+			self?.hideLoader()
 		}
 	}
 
@@ -57,7 +59,8 @@ class MovieListViewController: UIViewController, UITableViewDelegate, UITableVie
 	}
 
 	@objc private func refreshData(_ sender: Any) {
-		fetchMovies()
+		refreshControl.endRefreshing()
+		fetchMovies(shouldShowLoader: false)
 	}
 
 	private func resetState() {
@@ -95,7 +98,7 @@ class MovieListViewController: UIViewController, UITableViewDelegate, UITableVie
 
 	func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
 		if cell is PaginationLoaderTableViewCell {
-			fetchMovies(page: (currentPage ?? 0) + 1)
+			fetchMovies(page: (currentPage ?? 0) + 1, shouldShowLoader: false)
 		}
 	}
 }
