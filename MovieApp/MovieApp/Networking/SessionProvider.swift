@@ -12,9 +12,10 @@ class SessionProvider {
   // fetch Json Api
   static let dataSession: URLSession = {
     let configuration = URLSessionConfiguration.default
-    configuration.timeoutIntervalForRequest = 30.0
-    configuration.timeoutIntervalForResource = 30.0
+    configuration.timeoutIntervalForRequest = 10.0
+    configuration.timeoutIntervalForResource = 10.0
     configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
+		configuration.waitsForConnectivity = false
 
     return URLSession(configuration: configuration)
   }()

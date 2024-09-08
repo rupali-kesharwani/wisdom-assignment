@@ -23,4 +23,9 @@ class PaginationLoaderTableViewCell: UITableViewCell {
 		return cell
 	}
 
+	@IBOutlet var activityIndicator: UIActivityIndicatorView?
+
+	override func prepareForReuse() {
+		activityIndicator?.startAnimating()
+	}
 }

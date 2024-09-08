@@ -33,12 +33,8 @@ extension UIViewController {
 	func hideLoader() {
 		for view in view.subviews {
 			if view is LoaderView {
-				UIView.animate(withDuration: 0.25) {
-					view.layer.opacity = 0
-				} completion: { _ in
-					view.removeFromSuperview()
-				}
-
+				view.removeFromSuperview()
+				
 				return
 			}
 		}

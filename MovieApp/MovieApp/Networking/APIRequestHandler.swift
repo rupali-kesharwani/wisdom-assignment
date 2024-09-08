@@ -29,6 +29,10 @@ class APIRequestHandler<T: APIResponse> {
 								NetworkingError.invalidResponse)
 		}
 
+		guard httpResponse.statusCode != 0 else {
+			return T(error: NetworkingError.noInternet)
+		}
+
 		// Redirection error
 		if (300...399).contains(httpResponse
 			.statusCode) {
