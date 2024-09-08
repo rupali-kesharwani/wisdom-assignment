@@ -8,12 +8,13 @@
 import SwiftUI
 
 protocol ImageResponse {
-	init(image: UIImage)
+	init(image: UIImage, imageUrl: String)
 	init(error: Error)
 }
 
 class ImageRequestHandler<T: ImageResponse> {
 	func handle(
+		_ imageUrl: String,
 		_ data: Data?,
 		_ response: URLResponse?,
 		_ error: Error?
@@ -48,7 +49,7 @@ class ImageRequestHandler<T: ImageResponse> {
 		}
 
 		if let image = UIImage(data: data) {
-			return T(image: image)
+			return T(image: image, imageUrl: imageUrl)
 		}
 
 		return T(error: NetworkingError.invalidResponse)

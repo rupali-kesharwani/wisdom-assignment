@@ -6,11 +6,29 @@
 //
 
 import Foundation
+import UIKit
+
 
 class MoviesAPI {
 
 	private init() {
 		// Avoid initilizing this class
+	}
+
+	static func getImage(imageUrl: String, onComplete: @escaping (_ response: ImageRequestResponse) -> Void) {
+		guard let url = URL(string: imageUrl) else {
+			onComplete(ImageRequestResponse.init(error: NetworkingError.badRequest(code: 400)))
+
+			return
+		}
+
+		let task = SessionProvider.imageSession.dataTask(with: url) { data, response, error in
+			DispatchQueue.main.async {
+				onComplete(ImageRequestHandler<ImageRequestResponse>().handle(imageUrl, data, response, error))
+			}
+		}
+
+		task.resume()
 	}
 
 	static func getPopularMovies(page: Int, onComplete: @escaping (_ response: PopularMoviesResponse) -> Void) {
@@ -98,3 +116,17 @@ class MoviesAPI {
 	}
 }
 
+class ImageRequestResponse: ImageResponse {
+	var image: UIImage?
+	var error: Error?
+	var imageUrl: String?
+
+	required init(image: UIImage, imageUrl: String) {
+		self.image = image
+		self.imageUrl = imageUrl
+	}
+
+	required init(error: Error) {
+		self.error = error
+	}
+}

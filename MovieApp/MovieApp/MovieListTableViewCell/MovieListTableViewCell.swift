@@ -29,13 +29,34 @@ class MovieListTableViewCell: UITableViewCell {
 	@IBOutlet var ratingLabel: UILabel?
 	@IBOutlet var descriptionLabel: UILabel?
 
+	var movie: Movie?
+
 
 	func configure(using movie: Movie) {
+		self.movie = movie
+
 		titleLabel?.text = movie.title
 		releaseOnLabel?.text = movie.releaseDate
 		ratingLabel?.text = "\(movie.voteAverage ?? 0)/10.0"
 		descriptionLabel?.text = movie.overview
+
+		MoviesAPI.getImage(imageUrl: movie.posterUrl) { response in
+			guard let image = response.image else {
+				return
+			}
+
+			if self.movie?.posterUrl == response.imageUrl {
+				self.posterImageView?.image = image
+			}
+		}
 	}
 
 
+	override func prepareForReuse() {
+		titleLabel?.text = nil
+		releaseOnLabel?.text = nil
+		ratingLabel?.text = nil
+		descriptionLabel?.text = nil
+		posterImageView?.image = nil
+	}
 }
