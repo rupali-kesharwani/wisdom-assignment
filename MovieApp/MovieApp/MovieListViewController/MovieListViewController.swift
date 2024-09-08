@@ -9,7 +9,13 @@ import UIKit
 
 class MovieListViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
 
-	var movies: [Movie]?
+	var currentPage: Int?
+	var totalPages: Int?
+	var movies: [Movie] = []
+
+	var hasNextPage: Bool {
+		return (currentPage ?? 0) < (totalPages ?? 0)
+	}
 
 	@IBOutlet var tableView: UITableView?
 
@@ -17,8 +23,14 @@ class MovieListViewController: UIViewController, UITableViewDelegate, UITableVie
 		super.viewDidLoad()
 		
 		setupTableView()
-		MoviesAPI.getPopularMovies(page: 1) { [weak self] response in
-			self?.movies = response.movies
+		fetchMovies()
+	}
+
+	func fetchMovies(page: Int = 1) {
+		MoviesAPI.getPopularMovies(page: page) { [weak self] response in
+			self?.currentPage = response.page
+			self?.totalPages = response.totalPages
+			self?.movies.append(contentsOf: response.movies ?? [])
 			self?.tableView?.reloadData()
 		}
 	}
@@ -26,27 +38,41 @@ class MovieListViewController: UIViewController, UITableViewDelegate, UITableVie
 	private func setupTableView() {
 		tableView?.dataSource = self
 		tableView?.delegate = self
+
 		MovieListTableViewCell.register(in: tableView)
+		PaginationLoaderTableViewCell.register(in: tableView)
 	}
 
 	func numberOfSections(in tableView: UITableView) -> Int {
-		return movies != nil ? 1 : 0
+		return 1
 	}
 
 	func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-		return movies?.count ?? 0
+		if hasNextPage {
+			return movies.count + 1
+		}
+
+		return movies.count
 	}
 
 	func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-		let cell = MovieListTableViewCell.dequeueReusableCell(in: tableView, for: indexPath)
-		if let movie = movies?[indexPath.row] {
-			cell.configure(using: movie)
+		if hasNextPage && indexPath.row == movies.count {
+			return PaginationLoaderTableViewCell.dequeueReusableCell(in: tableView, for: indexPath)
 		}
+
+		let cell = MovieListTableViewCell.dequeueReusableCell(in: tableView, for: indexPath)
+		cell.configure(using: movies[indexPath.row])
 
 		return cell
 	}
 
 	func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
 		tableView.deselectRow(at: indexPath, animated: true)
+	}
+
+	func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+		if cell is PaginationLoaderTableViewCell {
+			fetchMovies(page: (currentPage ?? 0) + 1)
+		}
 	}
 }
