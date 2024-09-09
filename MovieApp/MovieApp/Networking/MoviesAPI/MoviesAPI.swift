@@ -114,19 +114,48 @@ class MoviesAPI {
 		}
 		task.resume()
 	}
+
+	static func searchMovies(query: String, onComplete: @escaping (_ response: SearchMoviesResponse) -> Void) {
+		guard let url = URL(string: "\(Server.baseUrl)/3/search/movie") else {
+			onComplete(SearchMoviesResponse(error: NetworkingError.badRequest(code: 400)))
+
+			return
+		}
+
+		guard var components = URLComponents(url: url, resolvingAgainstBaseURL: true) else {
+			onComplete(SearchMoviesResponse(error: NetworkingError.badRequest(code: 400)))
+
+			return
+		}
+
+		let queryItems: [URLQueryItem] = [
+			URLQueryItem(name: "query", value: query),
+			URLQueryItem(name: "include_adult", value: "false"),
+			URLQueryItem(name: "language", value: "en-US"),
+			URLQueryItem(name: "page", value: "1"),
+		]
+		components.queryItems = components.queryItems.map { $0 + queryItems } ?? queryItems
+
+		guard let url = components.url else {
+			onComplete(SearchMoviesResponse(error: NetworkingError.badRequest(code: 400)))
+
+			return
+		}
+
+		var request = URLRequest(url: url)
+		request.httpMethod = "GET"
+		request.timeoutInterval = 30
+		request.allHTTPHeaderFields = [
+			"accept": "application/json",
+			"Authorization": "Bearer \(Server.readAccessToken)"
+		]
+
+		let task = SessionProvider.dataSession.dataTask(with: request) { data, response, error  in
+			DispatchQueue.main.async {
+				onComplete(APIRequestHandler<SearchMoviesResponse>().handle(request, data, response, error))
+			}
+		}
+		task.resume()
+	}
 }
 
-class ImageRequestResponse: ImageResponse {
-	var image: UIImage?
-	var error: Error?
-	var imageUrl: String?
-
-	required init(image: UIImage, imageUrl: String) {
-		self.image = image
-		self.imageUrl = imageUrl
-	}
-
-	required init(error: Error) {
-		self.error = error
-	}
-}

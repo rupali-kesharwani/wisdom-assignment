@@ -1,22 +1,19 @@
 //
-//  MovieListViewController.swift
+//  SearchMovieViewController.swift
 //  MovieApp
 //
-//  Created by Rupali Kesharwani on 08/09/24.
+//  Created by Rupali Kesharwani on 09/09/24.
 //
 
 import UIKit
 
-class MovieListViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class SearchMovieViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate {
 
-	private let refreshControl = UIRefreshControl()
-
-	private var currentPage: Int?
-	private var totalPages: Int?
 	private var movies: [Movie] = []
-	private var hasNextPage: Bool {
-		return (currentPage ?? 0) < (totalPages ?? 0)
-	}
+	private var searchTimer: Timer?
+	private let debounceInterval: TimeInterval = 0.5
+	private var query: String?
+	private let loadingIndicator = UIActivityIndicatorView(style: .medium)
 
 	@IBOutlet var tableView: UITableView?
 
@@ -25,58 +22,69 @@ class MovieListViewController: UIViewController, UITableViewDelegate, UITableVie
 
 		setupNavigationBar()
 		setupTableView()
-		fetchMovies()
 	}
 
 	private func setupNavigationBar() {
-		self.title = "Popular Movies"
-		self.navigationController?.navigationBar.prefersLargeTitles = true
-		let searchButton = UIBarButtonItem(
-			image: UIImage(systemName: "magnifyingglass"),
-			style: .plain,
+		navigationController?.navigationBar.prefersLargeTitles = true
+		title = "Search movies"
+		loadingIndicator.hidesWhenStopped = true
+
+		let searchBar = UISearchBar()
+		searchBar.placeholder = "Search movies"
+		searchBar.searchTextField.rightView = loadingIndicator
+		searchBar.searchTextField.rightViewMode = .always
+		searchBar.delegate = self
+		navigationItem.titleView = searchBar
+
+		let doneButton = UIBarButtonItem(
+			title: "Close",
+			style: .done,
 			target: self,
-			action: #selector(Self.onSearchButtonTapped))
-		navigationItem.rightBarButtonItem = searchButton
+			action: #selector(Self.onDoneButtonTapped))
+		navigationItem.rightBarButtonItem = doneButton
 	}
 
-	@objc private func onSearchButtonTapped() {
-		let searchController = SearchMovieViewController(nibName: "SearchMovieViewController", bundle: nil)
-		let navigationController = UINavigationController(rootViewController: searchController)
-		navigationController.modalPresentationStyle = .overCurrentContext
-		present(navigationController, animated: true)
+	@objc private func onDoneButtonTapped() {
+		dismiss(animated: true)
 	}
 
 	private func setupTableView() {
 		tableView?.dataSource = self
 		tableView?.delegate = self
 
-		refreshControl.addTarget(self, action: #selector(refreshData(_:)), for: .valueChanged)
-		tableView?.refreshControl = refreshControl
-
 		MovieListTableViewCell.register(in: tableView)
 		PaginationLoaderTableViewCell.register(in: tableView)
 	}
 
-	@objc private func refreshData(_ sender: Any) {
-		fetchMovies(shouldShowLoader: false)
+	func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+		debounceSearch(query: searchText)
 	}
 
-	private func fetchMovies(page: Int = 1, shouldShowLoader: Bool = true) {
+	private func debounceSearch(query: String) {
+		// Invalidate any existing timer
+		searchTimer?.invalidate()
+
+		// Create a new timer
+		searchTimer = Timer.scheduledTimer(withTimeInterval: debounceInterval, repeats: false, block: { [weak self] _ in
+			self?.query = query
+			self?.performSearch(query: query, shouldShowLoader: true)
+		})
+	}
+
+	// MARK: - Perform the actual search
+	private func performSearch(query: String, shouldShowLoader: Bool) {
+
 		// Remove any existing error views
 		removeErrorView()
 
 		// Show loader view
 		if shouldShowLoader {
-			showLoader()
+			loadingIndicator.startAnimating()
 		}
 
-		MoviesAPI.getPopularMovies(page: page) { [weak self] response in
-
+		MoviesAPI.searchMovies(query: query) { [weak self] response in
 			// Hide loading state
-			self?.hideLoader()
-			if self?.refreshControl.isRefreshing == true {
-				self?.refreshControl.endRefreshing()
-			}
+			self?.loadingIndicator.stopAnimating()
 
 			// Handle error
 			if let error = response.error {
@@ -85,14 +93,8 @@ class MovieListViewController: UIViewController, UITableViewDelegate, UITableVie
 				return
 			}
 
-			// Reset in case of pull down to refresh
-			if page == 1 {
-				self?.resetState()
-			}
-
 			// Set state
-			self?.currentPage = response.page
-			self?.totalPages = response.totalPages
+			self?.resetState()
 			self?.movies.append(contentsOf: response.movies ?? [])
 
 			// Reload and remove loader
@@ -129,9 +131,7 @@ class MovieListViewController: UIViewController, UITableViewDelegate, UITableVie
 				})
 		} else {
 			let alert = UIAlertController(title: title, message: description, preferredStyle: .alert)
-			let okAction = UIAlertAction(title: "OK", style: .default, handler: { [weak self] _ in
-				self?.refreshControl.endRefreshing()
-			})
+			let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
 			let retryAction = UIAlertAction(title: recoveryButtonTitle, style: .default, handler: { [weak self] _ in
 				self?.recoverFromError()
 			})
@@ -143,13 +143,13 @@ class MovieListViewController: UIViewController, UITableViewDelegate, UITableVie
 
 	private func recoverFromError() {
 		removeErrorView()
-		fetchMovies()
+		if let query = self.query {
+			performSearch(query: query, shouldShowLoader: true)
+		}
 	}
 
 	private func resetState() {
 		self.movies = []
-		self.currentPage = nil
-		self.totalPages = nil
 	}
 
 	func numberOfSections(in tableView: UITableView) -> Int {
@@ -157,18 +157,10 @@ class MovieListViewController: UIViewController, UITableViewDelegate, UITableVie
 	}
 
 	func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-		if hasNextPage {
-			return movies.count + 1
-		}
-
 		return movies.count
 	}
 
 	func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-		if hasNextPage && indexPath.row == movies.count {
-			return PaginationLoaderTableViewCell.dequeueReusableCell(in: tableView, for: indexPath)
-		}
-
 		let cell = MovieListTableViewCell.dequeueReusableCell(in: tableView, for: indexPath)
 		cell.configure(using: movies[indexPath.row])
 
@@ -177,15 +169,5 @@ class MovieListViewController: UIViewController, UITableViewDelegate, UITableVie
 
 	func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
 		tableView.deselectRow(at: indexPath, animated: true)
-	}
-
-	func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-		if cell is PaginationLoaderTableViewCell {
-
-			// Delay for 1 sec to show the pagination loader
-			DispatchQueue.main.asyncAfter(deadline: .now().advanced(by: .seconds(1)), execute: { [weak self] in
-				self?.fetchMovies(page: (self?.currentPage ?? 0) + 1, shouldShowLoader: false)
-			})
-		}
 	}
 }
