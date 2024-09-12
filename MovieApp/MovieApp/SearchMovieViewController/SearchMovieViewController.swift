@@ -30,8 +30,21 @@ class SearchMovieViewController: UIViewController, UITableViewDelegate, UITableV
 	override func viewDidLoad() {
 		super.viewDidLoad()
 
+		registerForNotifications()
 		setupNavigationBar()
 		setupTableView()
+	}
+	
+	deinit {
+		NotificationCenter.default.removeObserver(self)
+	}
+
+	private func registerForNotifications() {
+		NotificationCenter.default.addObserver(
+			self,
+			selector: #selector(onFavouritesCollectionUpdated),
+			name: NSNotification.Name(rawValue: "FavouritesCollectionUpdated"),
+			object: nil)
 	}
 
 	private func setupNavigationBar() {
@@ -162,6 +175,10 @@ class SearchMovieViewController: UIViewController, UITableViewDelegate, UITableV
 		self.movies = []
 	}
 
+	@objc private func onFavouritesCollectionUpdated() {
+		tableView?.reloadData()
+	}
+	
 	func numberOfSections(in tableView: UITableView) -> Int {
 		return 1
 	}
@@ -179,5 +196,8 @@ class SearchMovieViewController: UIViewController, UITableViewDelegate, UITableV
 
 	func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
 		tableView.deselectRow(at: indexPath, animated: true)
+
+		let movieDetailViewController = MovieDetailViewController(movieId: movies[indexPath.row].id)
+		navigationController?.pushViewController(movieDetailViewController, animated: true)
 	}
 }
