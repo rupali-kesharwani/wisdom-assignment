@@ -221,3 +221,53 @@ class MovieListViewController: UIViewController, UITableViewDelegate, UITableVie
 		}
 	}
 }
+
+#if DEBUG
+extension MovieListViewController {
+	var testHook: TestHook { TestHook.init(target: self) }
+
+	class TestHook {
+		private let target: MovieListViewController
+
+		init(target: MovieListViewController) {
+			self.target = target
+		}
+
+		func getMovies() -> [Movie] {
+			return target.movies
+		}
+
+		func fetchMovies(page: Int = 1, shouldShowLoader: Bool = true) {
+			target.fetchMovies(page: page, shouldShowLoader: shouldShowLoader)
+		}
+
+		func getCurrentPage() -> Int {
+			target.currentPage ?? 0
+		}
+
+		func setCurrentPage(page: Int) {
+			target.currentPage = page
+		}
+
+		func getTotalPages() -> Int {
+			target.totalPages ?? 0
+		}
+
+		func setTotalPages(pages: Int) {
+			target.totalPages = pages
+		}
+
+		func getHasNextPage() -> Bool {
+			target.hasNextPage
+		}
+
+		func onSearchButtonTapped() {
+			target.onSearchButtonTapped()
+		}
+
+		func handleError(error: Error) {
+			target.handleError(error: error)
+		}
+	}
+}
+#endif
