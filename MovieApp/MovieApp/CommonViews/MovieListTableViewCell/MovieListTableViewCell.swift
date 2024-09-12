@@ -28,6 +28,7 @@ class MovieListTableViewCell: UITableViewCell {
 	@IBOutlet var releaseOnLabel: UILabel?
 	@IBOutlet var ratingLabel: UILabel?
 	@IBOutlet var descriptionLabel: UILabel?
+	@IBOutlet var favouriteLabel: UILabel?
 
 	var movie: Movie?
 
@@ -38,6 +39,7 @@ class MovieListTableViewCell: UITableViewCell {
 		releaseOnLabel?.text = movie.releaseDate
 		ratingLabel?.text = "\(movie.voteAverage ?? 0)/10.0"
 		descriptionLabel?.text = movie.overview
+		favouriteLabel?.isHidden = !moviesAPI.isFavourite(movieId: movie.id ?? -1)
 
 		moviesAPI.getImage(imageUrl: movie.posterUrl) { response in
 			guard let image = response.image else {
@@ -57,5 +59,6 @@ class MovieListTableViewCell: UITableViewCell {
 		ratingLabel?.text = nil
 		descriptionLabel?.text = nil
 		posterImageView?.image = nil
+		favouriteLabel?.isHidden = true
 	}
 }

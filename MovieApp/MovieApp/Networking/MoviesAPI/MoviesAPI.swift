@@ -16,6 +16,7 @@ protocol MoviesAPI {
 	func searchMovies(query: String, onComplete: @escaping (_ response: SearchMoviesResponse) -> Void)
 
 	func setAsFavourite(movieId: Int)
+	func removeAsFavourite(movieId: Int)
 	func isFavourite(movieId: Int) -> Bool
 }
 
@@ -182,6 +183,14 @@ class DefaultMoviesAPI: MoviesAPI {
 	func setAsFavourite(movieId: Int) {
 		favouriteMovies.insert(movieId)
 
+		// Save the set in UserDefaults
+		let intArray = Array(favouriteMovies)
+		UserDefaults.standard.set(intArray, forKey: "favouriteMovies")
+	}
+
+	func removeAsFavourite(movieId: Int) {
+		favouriteMovies.remove(movieId)
+		
 		// Save the set in UserDefaults
 		let intArray = Array(favouriteMovies)
 		UserDefaults.standard.set(intArray, forKey: "favouriteMovies")

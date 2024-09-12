@@ -35,9 +35,22 @@ class MovieListViewController: UIViewController, UITableViewDelegate, UITableVie
 	override func viewDidLoad() {
 		super.viewDidLoad()
 
+		registerForNotifications()
 		setupNavigationBar()
 		setupTableView()
 		fetchMovies()
+	}
+
+	deinit {
+		NotificationCenter.default.removeObserver(self)
+	}
+
+	private func registerForNotifications() {
+		NotificationCenter.default.addObserver(
+			self,
+			selector: #selector(onFavouritesCollectionUpdated),
+			name: NSNotification.Name(rawValue: "FavouritesCollectionUpdated"),
+			object: nil)
 	}
 
 	private func setupNavigationBar() {
@@ -162,6 +175,10 @@ class MovieListViewController: UIViewController, UITableViewDelegate, UITableVie
 		self.movies = []
 		self.currentPage = nil
 		self.totalPages = nil
+	}
+
+	@objc private func onFavouritesCollectionUpdated() {
+		tableView?.reloadData()
 	}
 
 	func numberOfSections(in tableView: UITableView) -> Int {

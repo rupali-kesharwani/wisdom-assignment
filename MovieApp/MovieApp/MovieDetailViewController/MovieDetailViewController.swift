@@ -75,14 +75,22 @@ class MovieDetailViewController: UIViewController {
 
 			self?.movie = response.movie
 			self?.reloadData()
-			self?.moviesAPI.getImage(imageUrl: self?.movie?.posterUrl ?? "") { [weak self] response in
-				self?.posterImageView?.image = response.image
-			}
 		}
 	}
 
 	private func reloadData() {
 		title = movie?.title
+		descriptionLabel?.text = movie?.overview
+		releaseDateLabel?.text = movie?.releaseDate
+		genresLabel?.text = movie?.genres?.compactMap({ $0.name }).joined(separator: ", ")
+		languagesLabel?.text = movie?.spokenLanguages?.compactMap({ $0.name }).joined(separator: ", ")
+		runtimeLabel?.text = "\(movie?.runtime ?? 0) mins"
+		ratingLabel?.text = "\(movie?.voteAverage ?? 0)/10.0"
+		favouriteButton?.setTitle(moviesAPI.isFavourite(movieId: movie?.id ?? -1) ? "Remove from favourites" : "Add to favourites", for: .normal)
+
+		moviesAPI.getImage(imageUrl: movie?.posterUrl ?? "") { [weak self] response in
+			self?.posterImageView?.image = response.image
+		}
 	}
 
 	private func handleError(error: Error) {
@@ -121,5 +129,17 @@ class MovieDetailViewController: UIViewController {
 
 	private func resetState() {
 		movie = nil
+	}
+
+	@IBAction func onFavouriteButtonTapped() {
+		if moviesAPI.isFavourite(movieId: movie?.id ?? -1) {
+			moviesAPI.removeAsFavourite(movieId: movie?.id ?? -1)
+		} else {
+			moviesAPI.setAsFavourite(movieId: movieId ?? -1)
+		}
+
+		reloadData()
+
+		NotificationCenter.default.post(name: NSNotification.Name(rawValue: "FavouritesCollectionUpdated"), object: nil)
 	}
 }
