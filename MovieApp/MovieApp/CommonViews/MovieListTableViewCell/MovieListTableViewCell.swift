@@ -31,8 +31,7 @@ class MovieListTableViewCell: UITableViewCell {
 
 	var movie: Movie?
 
-
-	func configure(using movie: Movie) {
+	func configure(using movie: Movie, moviesAPI: MoviesAPI = DefaultMoviesAPI.shared) {
 		self.movie = movie
 
 		titleLabel?.text = movie.title
@@ -40,7 +39,7 @@ class MovieListTableViewCell: UITableViewCell {
 		ratingLabel?.text = "\(movie.voteAverage ?? 0)/10.0"
 		descriptionLabel?.text = movie.overview
 
-		MoviesAPI.getImage(imageUrl: movie.posterUrl) { response in
+		moviesAPI.getImage(imageUrl: movie.posterUrl) { response in
 			guard let image = response.image else {
 				return
 			}

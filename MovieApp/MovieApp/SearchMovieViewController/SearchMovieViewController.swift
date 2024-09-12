@@ -9,6 +9,7 @@ import UIKit
 
 class SearchMovieViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate {
 
+	private let moviesAPI: MoviesAPI
 	private var movies: [Movie] = []
 	private var searchTimer: Timer?
 	private let debounceInterval: TimeInterval = 0.5
@@ -16,6 +17,15 @@ class SearchMovieViewController: UIViewController, UITableViewDelegate, UITableV
 	private let loadingIndicator = UIActivityIndicatorView(style: .medium)
 
 	@IBOutlet var tableView: UITableView?
+
+	init(moviesAPI: MoviesAPI = DefaultMoviesAPI.shared) {
+		self.moviesAPI = moviesAPI
+		super.init(nibName: "SearchMovieViewController", bundle: nil)
+	}
+
+	required init?(coder: NSCoder) {
+		fatalError("init(coder:) has not been implemented")
+	}
 
 	override func viewDidLoad() {
 		super.viewDidLoad()
@@ -82,7 +92,7 @@ class SearchMovieViewController: UIViewController, UITableViewDelegate, UITableV
 			loadingIndicator.startAnimating()
 		}
 
-		MoviesAPI.searchMovies(query: query) { [weak self] response in
+		moviesAPI.searchMovies(query: query) { [weak self] response in
 			// Hide loading state
 			self?.loadingIndicator.stopAnimating()
 

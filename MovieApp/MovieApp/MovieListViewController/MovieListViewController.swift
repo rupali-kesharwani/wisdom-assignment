@@ -9,16 +9,28 @@ import UIKit
 
 class MovieListViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
 
-	private let refreshControl = UIRefreshControl()
-
+	private let moviesAPI: MoviesAPI
 	private var currentPage: Int?
 	private var totalPages: Int?
 	private var movies: [Movie] = []
+	
 	private var hasNextPage: Bool {
 		return (currentPage ?? 0) < (totalPages ?? 0)
 	}
+	
+	private let refreshControl = UIRefreshControl()
 
 	@IBOutlet var tableView: UITableView?
+
+	init(moviesAPI: MoviesAPI = DefaultMoviesAPI.shared) {
+		self.moviesAPI = moviesAPI
+
+		super.init(nibName: "MovieListViewController", bundle: nil)
+	}
+
+	required init?(coder: NSCoder) {
+		fatalError("init(coder:) has not been implemented")
+	}
 
 	override func viewDidLoad() {
 		super.viewDidLoad()
@@ -40,7 +52,7 @@ class MovieListViewController: UIViewController, UITableViewDelegate, UITableVie
 	}
 
 	@objc private func onSearchButtonTapped() {
-		let searchController = SearchMovieViewController(nibName: "SearchMovieViewController", bundle: nil)
+		let searchController = SearchMovieViewController()
 		let navigationController = UINavigationController(rootViewController: searchController)
 		navigationController.modalPresentationStyle = .overCurrentContext
 		present(navigationController, animated: true)
@@ -70,7 +82,7 @@ class MovieListViewController: UIViewController, UITableViewDelegate, UITableVie
 			showLoader()
 		}
 
-		MoviesAPI.getPopularMovies(page: page) { [weak self] response in
+		moviesAPI.getPopularMovies(page: page) { [weak self] response in
 
 			// Hide loading state
 			self?.hideLoader()
@@ -177,8 +189,11 @@ class MovieListViewController: UIViewController, UITableViewDelegate, UITableVie
 
 	func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
 		tableView.deselectRow(at: indexPath, animated: true)
-	}
 
+		let movieDetailViewController = MovieDetailViewController(movieId: movies[indexPath.row].id)
+		navigationController?.pushViewController(movieDetailViewController, animated: true)
+	}
+	
 	func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
 		if cell is PaginationLoaderTableViewCell {
 

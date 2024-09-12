@@ -9,13 +9,34 @@ import Foundation
 import UIKit
 
 
-class MoviesAPI {
+protocol MoviesAPI {
+	func getImage(imageUrl: String, onComplete: @escaping (_ response: ImageRequestResponse) -> Void)
+	func getPopularMovies(page: Int, onComplete: @escaping (_ response: PopularMoviesResponse) -> Void)
+	func getMovieDetail(movieId: Int, onComplete: @escaping (_ response: MovieDetailResponse) -> Void)
+	func searchMovies(query: String, onComplete: @escaping (_ response: SearchMoviesResponse) -> Void)
+
+	func setAsFavourite(movieId: Int)
+	func isFavourite(movieId: Int) -> Bool
+}
+
+class DefaultMoviesAPI: MoviesAPI {
+
+	static let shared = DefaultMoviesAPI()
+
+	private var favouriteMovies: Set<Int> = []
 
 	private init() {
-		// Avoid initilizing this class
+		loadFavouriteMovies()
 	}
 
-	static func getImage(imageUrl: String, onComplete: @escaping (_ response: ImageRequestResponse) -> Void) {
+	func loadFavouriteMovies() {
+		favouriteMovies.removeAll()
+		if let intArray = UserDefaults.standard.array(forKey: "favouriteMovies") as? [Int] {
+			favouriteMovies.formUnion(intArray)
+		}
+	}
+
+	func getImage(imageUrl: String, onComplete: @escaping (_ response: ImageRequestResponse) -> Void) {
 		guard let url = URL(string: imageUrl) else {
 			onComplete(ImageRequestResponse.init(error: NetworkingError.badRequest(code: 400)))
 
@@ -31,7 +52,7 @@ class MoviesAPI {
 		task.resume()
 	}
 
-	static func getPopularMovies(page: Int, onComplete: @escaping (_ response: PopularMoviesResponse) -> Void) {
+	func getPopularMovies(page: Int, onComplete: @escaping (_ response: PopularMoviesResponse) -> Void) {
 		guard let url = URL(string: "\(Server.baseUrl)/3/discover/movie") else {
 			onComplete(PopularMoviesResponse(error: NetworkingError.badRequest(code: 400)))
 
@@ -75,13 +96,13 @@ class MoviesAPI {
 		task.resume()
 	}
 
-	static func getMovieDetail(movieId: Int, onComplete: @escaping (_ response: MovieDetailResponse) -> Void) {
+	func getMovieDetail(movieId: Int, onComplete: @escaping (_ response: MovieDetailResponse) -> Void) {
 		guard let url = URL(string: "\(Server.baseUrl)/3/movie/\(movieId)") else {
 			onComplete(MovieDetailResponse(error: NetworkingError.badRequest(code: 400)))
 
 			return
 		}
-		
+
 		guard var components = URLComponents(url: url, resolvingAgainstBaseURL: true) else {
 			onComplete(MovieDetailResponse(error: NetworkingError.badRequest(code: 400)))
 
@@ -115,7 +136,7 @@ class MoviesAPI {
 		task.resume()
 	}
 
-	static func searchMovies(query: String, onComplete: @escaping (_ response: SearchMoviesResponse) -> Void) {
+	func searchMovies(query: String, onComplete: @escaping (_ response: SearchMoviesResponse) -> Void) {
 		guard let url = URL(string: "\(Server.baseUrl)/3/search/movie") else {
 			onComplete(SearchMoviesResponse(error: NetworkingError.badRequest(code: 400)))
 
@@ -156,6 +177,18 @@ class MoviesAPI {
 			}
 		}
 		task.resume()
+	}
+
+	func setAsFavourite(movieId: Int) {
+		favouriteMovies.insert(movieId)
+
+		// Save the set in UserDefaults
+		let intArray = Array(favouriteMovies)
+		UserDefaults.standard.set(intArray, forKey: "favouriteMovies")
+	}
+
+	func isFavourite(movieId: Int) -> Bool {
+		return favouriteMovies.contains(movieId)
 	}
 }
 
